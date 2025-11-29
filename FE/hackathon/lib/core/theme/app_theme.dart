@@ -23,6 +23,34 @@ class AppTheme {
   static const Color gradientStart = Color(0xFF2B7FFF);
   static const Color gradientEnd = Color(0xFF1447E6);
 
+  // Notification Gradients
+  static LinearGradient get dangerGradient {
+    return const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFFFB2C36),
+        Color(0xFFE7000B),
+      ],
+    );
+  }
+
+  static LinearGradient get warningGradient {
+    return const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFFFE9A00),
+        Color(0xFFE17100),
+      ],
+    );
+  }
+
+  // Status Colors
+  static const Color statusGreen = Color(0xFF00C950);
+  static const Color statusGreenLight = Color(0xFFDCFCE7);
+  static const Color statusGreenText = Color(0xFF008236);
+
   /// App Theme Data
   static ThemeData get lightTheme {
     return ThemeData(
@@ -41,6 +69,13 @@ class AppTheme {
           fontWeight: FontWeight.w400,
           height: 1.2,
           letterSpacing: 0.013,
+          color: textPrimary,
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w400,
+          height: 1.4,
+          letterSpacing: -0.022,
           color: textPrimary,
         ),
         titleMedium: TextStyle(
@@ -71,7 +106,23 @@ class AppTheme {
           letterSpacing: -0.011,
           color: textTertiary,
         ),
+        labelSmall: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          height: 1.33,
+          letterSpacing: 0,
+          color: textTertiary,
+        ),
       ),
+    );
+  }
+
+  /// Permission Icon Gradient
+  static LinearGradient get permissionIconGradient {
+    return const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFFDBEAFE), Color(0xFFBEDBFF)],
     );
   }
 

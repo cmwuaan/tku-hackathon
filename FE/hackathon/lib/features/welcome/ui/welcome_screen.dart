@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/feature_card.dart';
 import '../../../shared/widgets/primary_button.dart';
+import '../../permissions/ui/permission_screen.dart';
 
 /// Welcome Screen
 /// First screen shown to users introducing the app features
@@ -9,6 +10,26 @@ class WelcomeScreen extends StatelessWidget {
   final VoidCallback? onStartSetup;
 
   const WelcomeScreen({super.key, this.onStartSetup});
+
+  void _handleStartSetup(BuildContext context) {
+    if (onStartSetup != null) {
+      onStartSetup!();
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const PermissionScreen(
+            currentStep: 1,
+            totalSteps: 3,
+            permissionTitle: 'Run in background',
+            permissionDescription:
+                'Allow the app to continue running when you close the screen or switch to other apps',
+            infoDescription: 'Required for continuous protection',
+            icon: Icons.settings_backup_restore,
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +123,10 @@ class WelcomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 24),
                 child: Column(
                   children: [
-                    PrimaryButton(text: 'Start setup', onPressed: onStartSetup),
+                    PrimaryButton(
+                      text: 'Start setup',
+                      onPressed: () => _handleStartSetup(context),
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'The app requires some permissions to work',
