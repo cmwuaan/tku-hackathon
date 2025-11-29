@@ -1,0 +1,23 @@
+---
+description: Sound Watcher Figma MCP
+globs:
+alwaysApply: false
+---
+
+# Figma MCP Instructions
+
+## Your tools:
+
+### `figma-soundwatcher`: To get the information about the design and download the assets in Figma format.
+
+## Instructions
+
+- Base on the figma file url, get the node data by node id and place it in the `docs/tasks/<component-name>/figma-data/` folder. Name it `node-data.json`.
+
+- `node-data.json` is a huge file, so break it into multiple smaller files, where each file contains the nodes of a section of the component. Place each section file in the `docs/tasks/<component-name>/figma-data/sections` folder. List all of these sections and their files in the `node-data.json` file.
+
+- Store the assets in the `docs/tasks/<component-name>/figma-data/assets` folder.
+
+- Think carefully and generate a good plan to implement the component, step by step. Put your plan in the `docs/tasks/<component-name>/plan.md` file.
+
+- You can suggest best practices and strategies to implement the component. Please provide the reasoning for your choices.
