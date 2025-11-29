@@ -1,0 +1,33 @@
+// Audio Detection API Contract
+// Request/Response schema for audio file detection endpoint
+
+Project AudioDetectionAPI {
+  Note: 'API contract for processing .wav audio files and returning AI detection results'
+}
+
+// Enum for detection types
+Enum DetectionType {
+  warning [note: 'Warning level detection']
+  danger [note: 'Danger level detection']
+  info [note: 'Info level detection']
+}
+
+// API Request Schema
+Table AudioDetectionRequest {
+  audio_file File [not null, note: 'Multipart file upload - .wav audio file']
+  time_created DateTime [not null, note: 'Timestamp when the detection request was created']
+  
+  Note: 'Request payload for audio detection endpoint'
+}
+
+// API Response Schema
+Table AudioDetectionResponse {
+  detection_type DetectionType [not null, note: 'Type of detection: warning, danger, or info']
+  detection_result JSON [note: 'Detailed AI detection result/analysis data']
+  detection_message String [note: 'Human-readable message from the AI detection']
+  confidence Number [note: 'Confidence score from AI detection (0-1)']
+  time_processed DateTime [note: 'Timestamp when AI processing was completed']
+  
+  Note: 'Response payload containing AI detection results sent back to frontend'
+}
+
