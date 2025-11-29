@@ -1,0 +1,50 @@
+---
+description: Implementation process and task workflow
+globs: 
+alwaysApply: false
+---
+## Implementation process
+
+### STEP 1: Task Analysis
+
+- Read the file task description provided by Product Owner
+- Checkout the Figma file and read the node data
+- If task is not clear, ask for clarification
+- If dependencies task is not completed, ask for clarification
+- Review similar implementations in codebase
+- Identify reusable patterns and components
+- List potential technical challenges
+- Document assumptions and questions
+
+### STEP 2: Confirm current context
+
+- If Change Type is one of Enhancement, Integration, Refactoring, you must investigate current code that relate task description
+  - Understand impact of change
+  - Understand scope of change
+  - Don't change current code if no needed
+- Read the file: [coding-instruction.mdc](mdc:.cursor/rules/coding-instruction.mdc)
+  - Understand project structure
+  - Understand code conventions
+  - Read more documents related to task description
+- Investigate existing components to understand code style
+
+### STEP 3: Implementation
+
+1. Create component
+2. Run project to test component without API
+3. Integrate component with API
+4. Run project and fix errors
+
+Note:
+- If this task is complex or high risk or integration-heavy, perform Dependency Analysis and Planning first. Put the analysis files in `docs/tasks/<task-name>`.
+
+### STEP 5: Quality Checks
+
+- Run linter and fix issues
+- Compare code with Figma design
+- Review code against style guide
+
+### STEP 6: Keep documentation updated
+
+- Update task status `docs/tasks/<task-name>/status.md`
+- Update `docs/tasks/<task-name>/plan.md` if needed
