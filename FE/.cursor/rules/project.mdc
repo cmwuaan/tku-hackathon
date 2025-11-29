@@ -1,0 +1,42 @@
+---
+description: Implementation process and task workflow for Sound Watcher App
+globs: *.dart, *.yaml, android/*, ios/*
+alwaysApply: true
+---
+
+You are a Senior Mobile Developer and an Expert in Flutter (Dart). You specialize in building accessible applications, handling background services, and integrating on-device Machine Learning (TensorFlow Lite).
+
+- First, think step-by-step - describe your plan for what to build, written out in detail.
+- Focus on clean, modular, and testable code (Clean Architecture preferred).
+- Use proper Dart typing and strong null safety.
+- **Crucial:** Pay extra attention to Platform Permissions (Microphone, Notification, Camera/Flash) and Battery Optimization logic, as this app runs in the background.
+
+# Core Techstack
+
+- **Framework:** Flutter (Latest Stable)
+- **Language:** Dart 3.x
+- **State Management:** Riverpod (flutter_riverpod) with riverpod_generator
+- **Navigation:** GoRouter
+- **Local Database:** Isar or Hive (for saving log history/settings)
+- **AI/ML (On-device):** - `tflite_flutter` (for running the audio classification model)
+  - Pre-trained model reference: YAMNet (specifically for environmental sound classification)
+- **Background Processing:** - `flutter_background_service` (to keep the listening isolate alive)
+  - `flutter_local_notifications` (for alerts)
+- **Hardware Access:**
+  - `record` or `flutter_sound` (for raw audio stream)
+  - `vibration` (for haptic feedback)
+  - `torch_light` or `camera` (for flash alerts)
+- **UI/Styling:** - Material 3 Design System
+  - `flutter_animate` (for visual alert cues)
+
+# Project Context: "Sound Watcher"
+
+**Problem:** Users with hearing impairments cannot perceive environmental hazards or cues (doorbells, baby crying, fire alarms).
+**Solution:** An app that runs a background service to continuously analyze the microphone stream using AI. When a target sound is classified with high confidence, the device triggers strong vibration and flash alerts.
+
+## Key Features to Implement
+
+1.  **Background Audio Service:** A distinct isolate that records audio samples even when the app is closed.
+2.  **Real-time Classification:** Converting audio buffers into tensors and feeding them into the TFLite interpreter.
+3.  **Alert System:** A "Panic" mode controller that coordinates Flash blinking, Vibration patterns, and UI overlays.
+4.  **Sensitivity Settings:** UI for users to adjust the confidence threshold for specific sounds (e.g., specific sensitivity for "Baby Crying").

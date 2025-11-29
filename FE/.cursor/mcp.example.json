@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "Figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"],
+      "env": {
+        "FIGMA_API_KEY": "<your-figma-api-key>"
+      }
+    },
+    "Notion": {
+      "command": "npx",
+      "args": ["-y", "@suekou/mcp-notion-server"],
+      "env": {
+        "NOTION_API_TOKEN": "<notion-api-token>",
+        "NOTION_MARKDOWN_CONVERSION": true
+      }
+    },
+    "Playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    },
+    "Linear": {
+      "url": "https://mcp.linear.app/sse"
+    }
+  }
+}
