@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:record/record.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
 /// Audio Recording Service
-/// Handles continuous audio recording with threshold detection
+/// Handles continuous audio recording with threshold detection using MethodChannel
 class AudioRecordingService {
-  final AudioRecorder _recorder = AudioRecorder();
+  static const MethodChannel _channel = MethodChannel('com.hackathon/audio');
 
   StreamController<double>? _amplitudeStreamController;
   StreamController<String>? _recordedFileStreamController;
@@ -32,10 +32,10 @@ class AudioRecordingService {
   bool get isRecording => _isRecording;
   bool get isPaused => _isPaused;
 
-  /// Initialize the recorder controller
+  /// Initialize the recorder
   Future<void> initialize() async {
     try {
-      // Create recordings directory in system temp (works without path_provider)
+      // Create recordings directory in system temp
       final tempDir = Directory.systemTemp;
       final recordingsPath = '${tempDir.path}/guardian_recordings';
 
@@ -44,18 +44,30 @@ class AudioRecordingService {
         await dir.create(recursive: true);
       }
 
-      // Check if recorder has permission
-      if (await _recorder.hasPermission()) {
-        _amplitudeStreamController = StreamController<double>.broadcast();
-        _recordedFileStreamController = StreamController<String>.broadcast();
-      } else {
+      // Request microphone permission
+      final hasPermission = await _requestPermission();
+      if (!hasPermission) {
         throw Exception('Microphone permission not granted');
       }
+
+      _amplitudeStreamController = StreamController<double>.broadcast();
+      _recordedFileStreamController = StreamController<String>.broadcast();
     } catch (e) {
       debugPrint('Error initializing audio recording service: $e');
       // Initialize controllers anyway - path will be handled when recording starts
       _amplitudeStreamController = StreamController<double>.broadcast();
       _recordedFileStreamController = StreamController<String>.broadcast();
+    }
+  }
+
+  /// Request microphone permission
+  Future<bool> _requestPermission() async {
+    try {
+      final result = await _channel.invokeMethod<bool>('requestPermission');
+      return result ?? false;
+    } catch (e) {
+      debugPrint('Error requesting permission: $e');
+      return false;
     }
   }
 
@@ -77,22 +89,17 @@ class AudioRecordingService {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       _currentRecordingPath = '$recordingDir/recording_$timestamp.m4a';
 
-      // Check permission before recording
-      if (await _recorder.hasPermission()) {
-        await _recorder.start(
-          const RecordConfig(),
-          path: _currentRecordingPath!,
-        );
+      // Start recording via native channel
+      await _channel.invokeMethod('startRecording', {
+        'path': _currentRecordingPath!,
+      });
 
-        _isRecording = true;
-        _isPaused = false;
-        _thresholdCrossedTime = null;
+      _isRecording = true;
+      _isPaused = false;
+      _thresholdCrossedTime = null;
 
-        // Start monitoring amplitude
-        _startAmplitudeMonitoring();
-      } else {
-        throw Exception('Microphone permission not granted');
-      }
+      // Start monitoring amplitude
+      _startAmplitudeMonitoring();
     } catch (e) {
       debugPrint('Error starting recording: $e');
       rethrow;
@@ -104,7 +111,11 @@ class AudioRecordingService {
     if (!_isRecording) return;
 
     _stopAmplitudeMonitoring();
-    await _recorder.stop();
+    try {
+      await _channel.invokeMethod('stopRecording');
+    } catch (e) {
+      debugPrint('Error stopping recording: $e');
+    }
     _isRecording = false;
     _isPaused = false;
     _currentRecordingPath = null;
@@ -117,7 +128,11 @@ class AudioRecordingService {
 
     _isPaused = true;
     _stopAmplitudeMonitoring();
-    await _recorder.stop();
+    try {
+      await _channel.invokeMethod('stopRecording');
+    } catch (e) {
+      debugPrint('Error pausing recording: $e');
+    }
   }
 
   /// Resume recording after processing
@@ -143,28 +158,23 @@ class AudioRecordingService {
       try {
         if (_isRecording && !_isPaused) {
           try {
-            // Get current amplitude from recorder
-            final amplitude = await _recorder.getAmplitude();
+            // Get current amplitude from native recorder
+            final amplitude = await _channel.invokeMethod<double>(
+              'getAmplitude',
+            );
+            final db = amplitude ?? 0.0;
 
-            // Convert amplitude to dB
-            // Amplitude.current is typically -160 to 0 dB
-            final db = amplitude.current > -160 ? amplitude.current : -80.0;
+            // Emit amplitude value
+            _amplitudeStreamController?.add(db);
 
-            // Emit amplitude value (convert to positive scale for display)
-            final displayDb =
-                db + 160; // Convert to 0-160 scale, then normalize
-            _amplitudeStreamController?.add(displayDb);
-
-            // Check threshold (30dB on the normalized scale)
-            if (displayDb >= _thresholdDb && _thresholdCrossedTime == null) {
+            // Check threshold (30dB)
+            if (db >= _thresholdDb && _thresholdCrossedTime == null) {
               _thresholdCrossedTime = DateTime.now();
-              debugPrint(
-                'Threshold crossed at ${displayDb.toStringAsFixed(2)}dB',
-              );
+              debugPrint('Threshold crossed at ${db.toStringAsFixed(2)}dB');
 
               // Wait 5 seconds and capture audio
               _captureAudioClipAfterDelay();
-            } else if (displayDb < _thresholdDb) {
+            } else if (db < _thresholdDb) {
               // Reset threshold crossing if level drops below threshold
               _thresholdCrossedTime = null;
             }
@@ -198,7 +208,11 @@ class AudioRecordingService {
     try {
       // Stop current recording
       final capturedPath = _currentRecordingPath;
-      await _recorder.stop();
+      try {
+        await _channel.invokeMethod('stopRecording');
+      } catch (e) {
+        debugPrint('Error stopping recording for capture: $e');
+      }
       _isRecording = false;
 
       // Wait for the file to be finalized
@@ -235,6 +249,5 @@ class AudioRecordingService {
     _stopAmplitudeMonitoring();
     _amplitudeStreamController?.close();
     _recordedFileStreamController?.close();
-    _recorder.dispose();
   }
 }
